@@ -1,16 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, TrendingUp, Coffee, Copy, Edit, Save, ThumbsUp, ThumbsDown, RotateCcw, Trash2 } from 'lucide-react';
+import { Send, Paperclip, Mic, Square, Sparkles, User, Bot } from 'lucide-react';
 
 const ButterChatUI = () => {
   const [messages, setMessages] = useState([
     {
-      role: 'assistant',
-      content: "Hey Steve! ☕ Grab your morning coffee and let's dive into how your business is doing today.\n\nHere's what's happening in the business world:\n\n🚗 **Retail Shifts**: McDonald's reinforcing accountability on value with franchisees as consumer spending patterns evolve. Small business owners should watch pricing strategies closely.\n\n✈️ **Travel Updates**: Airlines adjusting elite status programs - Southwest received an $11M credit from DOT for operational improvements, showing regulatory focus on customer experience.\n\n🤖 **AI Revolution**: NVIDIA's H200 chips getting partial export clearance to China under"
-    }]);
+      id: 1,
+      type: 'bot',
+      content: "Hi! I'm ButterChat AI. How can I assist you today?",
+      timestamp: new Date(),
+    }
+  ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [hoveredMessage, setHoveredMessage] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -18,29 +22,41 @@ const ButterChatUI = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping]);
+  }, [messages]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [input]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = {
+      id: messages.length + 1,
+      type: 'user',
+      content: input,
+      timestamp: new Date(),
+    };
+
+    setMessages([...messages, userMessage]);
     setInput('');
     setIsTyping(true);
 
+    // Simulate bot response
     setTimeout(() => {
-      const responses = [
-        "Great question! Based on your business data, I recommend focusing on customer retention this quarter. Your repeat customer rate has increased by 15%, which is excellent. Let's build on that momentum by implementing a personalized email campaign targeting customers who haven't purchased in 30+ days.",
-        "I've analyzed your recent sales trends. Your top-performing products are showing consistent growth, especially in the afternoon hours between 2-4 PM. Consider running targeted promotions during slower morning periods to balance out daily revenue streams.",
-        "Looking at your conversation data, customers are asking more questions about product customization. This presents a great opportunity! I suggest creating a simple customization tool on your website - it could increase conversion rates by 20-30% based on similar businesses.",
-        "Your analytics show strong engagement on social media, particularly Instagram. Your audience is most active on Tuesdays and Thursdays between 6-8 PM. Let's schedule your key announcements and promotions during these peak windows for maximum impact.",
-        "I notice your appointment booking rate has improved by 23% since implementing the new calendar system. To build on this success, consider offering time-based incentives - like 10% off for appointments booked during off-peak hours."
-      ];
-      
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setMessages(prev => [...prev, { role: 'assistant', content: randomResponse }]);
+      const botMessage = {
+        id: messages.length + 2,
+        type: 'bot',
+        content: "I'm here to help! This is a demo response. In production, this would be connected to your AI backend.",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
-    }, 2000);
+    }, 1500);
   };
 
   const handleKeyPress = (e) => {
@@ -50,211 +66,179 @@ const ButterChatUI = () => {
     }
   };
 
-  const handleCopy = (content) => {
-    navigator.clipboard.writeText(content);
+  const toggleRecording = () => {
+    setIsRecording(!isRecording);
+  };
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-4 py-4 space-y-2">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className="group relative"
-              onMouseEnter={() => setHoveredMessage(index)}
-              onMouseLeave={() => setHoveredMessage(null)}
-            >
-              {/* Message Content */}
+    <div className="flex flex-col h-screen w-full bg-black">
+      {/* Header */}
+      <div className="border-b border-zinc-800/50 bg-black/95 backdrop-blur-sm px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 via-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/50 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent"></div>
+              <Sparkles className="w-6 h-6 text-white relative z-10 drop-shadow-lg" />
+            </div>
+            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-purple-400 rounded-full border-2 border-black shadow-lg shadow-purple-500/50 animate-pulse"></div>
+          </div>
+          <div>
+            <h2 className="text-white font-semibold text-lg bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              ButterChat AI
+            </h2>
+            <p className="text-xs text-gray-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse"></span>
+              Online • Always here to help
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages Area */}
+      <div className="max-w-4xl mx-auto flex-1 overflow-y-auto px-4 py-6 space-y-6 custom-scrollbar">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={` flex gap-3 ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+          >
+            {/* Avatar */}
+            <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-lg relative overflow-hidden ${
+              message.type === 'bot'
+                ? 'bg-gradient-to-br from-purple-600 via-purple-500 to-violet-600 shadow-purple-500/50'
+                : 'bg-gradient-to-br from-zinc-700 via-zinc-600 to-zinc-700 shadow-zinc-500/30'
+            }`}>
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent"></div>
+              {message.type === 'bot' ? (
+                <Bot className="w-5 h-5 text-white relative z-10 drop-shadow-md" />
+              ) : (
+                <User className="w-5 h-5 text-white relative z-10 drop-shadow-md" />
+              )}
+            </div>
+
+            {/* Message Bubble */}
+            <div className={`flex flex-col max-w-[55%] ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
               <div
-                className={`rounded-2xl px-6 py-4 ${
-                  message.role === 'user'
-                    ? 'bg-gray-100 ml-auto'
-                    : 'bg-white border border-gray-200'
+                className={`px-4 py-3 rounded-2xl ${
+                  message.type === 'bot'
+                    ? 'bg-gradient-to-br from-purple-950/50 via-purple-900/40 to-violet-950/50 border border-purple-800/30 text-white'
+                    : 'bg-gradient-to-br from-purple-900/30 via-purple-800/30 to-violet-900/30 border border-purple-700/40 text-white'
                 }`}
               >
-                {message.role === 'assistant' && index === 0 && (
-                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Coffee size={16} className="text-white" />
-                    </div>
-                    <span className="text-sm font-semibold text-gray-700">Good Morning, Steve!</span>
-                  </div>
-                )}
-                
-                {message.role === 'assistant' && index !== 0 && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Sparkles size={14} className="text-white" />
-                    </div>
-                    <span className="text-xs font-semibold text-gray-600">Butter AI</span>
-                  </div>
-                )}
-
-                <div className="prose prose-sm max-w-none text-gray-800">
-                  {message.content.split('\n').map((line, i) => {
-                    if (line.startsWith('📈') || line.startsWith('🚗') || line.startsWith('✈️') || line.startsWith('🤖') || line.startsWith('💼')) {
-                      return (
-                        <div key={i} className="my-2 pl-3 border-l-2 border-blue-300">
-                          <p className="text-sm leading-relaxed">{line}</p>
-                        </div>
-                      );
-                    }
-                    return line ? <p key={i} className="mb-2 leading-relaxed">{line}</p> : <br key={i} />;
-                  })}
-                </div>
+                <p className="text-sm leading-relaxed">{message.content}</p>
               </div>
+              <span className="text-xs text-gray-500 mt-1 px-2">
+                {formatTime(message.timestamp)}
+              </span>
+            </div>
+          </div>
+        ))}
 
-              {/* Action Buttons */}
-              <div className={`flex items-center gap-1 mt-2 transition-opacity duration-200 ${
-                hoveredMessage === index ? 'opacity-100' : 'opacity-0'
-              }`}>
-                <button
-                  onClick={() => handleCopy(message.content)}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
-                  title="Copy"
-                >
-                  <Copy size={16} />
-                </button>
-                
-                {message.role === 'assistant' && (
-                  <>
-                    <button
-                      className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
-                      title="Good response"
-                    >
-                      <ThumbsUp size={16} />
-                    </button>
-                    <button
-                      className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
-                      title="Bad response"
-                    >
-                      <ThumbsDown size={16} />
-                    </button>
-                    <button
-                      className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
-                      title="Regenerate"
-                    >
-                      <RotateCcw size={16} />
-                    </button>
-                  </>
-                )}
-
-                {message.role === 'user' && (
-                  <>
-                    <button
-                      className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
-                      title="Edit"
-                    >
-                      <Edit size={16} />
-                    </button>
-                  </>
-                )}
-
-                <button
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
-                  title="Save"
-                >
-                  <Save size={16} />
-                </button>
-                
-                <button
-                  className="p-2 rounded-lg hover:bg-red-50 transition-colors text-gray-600 hover:text-red-600"
-                  title="Delete"
-                >
-                  <Trash2 size={16} />
-                </button>
+        {/* Typing Indicator */}
+        {isTyping && (
+          <div className="flex gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 via-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/50 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent"></div>
+              <Bot className="w-5 h-5 text-white relative z-10 drop-shadow-md" />
+            </div>
+            <div className="bg-gradient-to-br from-purple-950/50 via-purple-900/40 to-violet-950/50 border border-purple-800/30 px-4 py-3 rounded-2xl">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce shadow-sm shadow-purple-500/50" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-purple-300 rounded-full animate-bounce shadow-sm shadow-purple-400/50" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce shadow-sm shadow-violet-500/50" style={{ animationDelay: '300ms' }}></div>
               </div>
             </div>
-          ))}
+          </div>
+        )}
 
-          {/* Typing Indicator */}
-          {isTyping && (
-            <div className="group relative">
-              <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <Sparkles size={14} className="text-white" />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-600">Butter AI</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                  </div>
-                  <span className="text-sm text-gray-500">Thinking...</span>
-                </div>
-                <div className="mt-3 relative w-40 h-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-pulse"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 bg-white px-4 py-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-end gap-3">
-            <div className="flex-1 relative">
+      <div className="border-t border-zinc-800/50 bg-black px-4 py-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Suggestions (optional) */}
+          <div className="flex gap-2 mb-3 overflow-x-auto pb-2 custom-scrollbar">
+            {['Explain quantum computing', 'Write a story', 'Help with code', 'Business advice'].map((suggestion, idx) => (
+              <button
+                key={idx}
+                onClick={() => setInput(suggestion)}
+                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-gray-300 text-sm rounded-lg border border-zinc-800/50 whitespace-nowrap transition"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
+          {/* Input Box */}
+          <div className="relative bg-zinc-900 border border-zinc-800/50 rounded-2xl focus-within:border-emerald-500/50 transition-colors">
+            <div className="flex items-end gap-2 p-3">
+              {/* Attachment Button */}
+              <button className="flex-shrink-0 p-2.5 text-gray-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-all duration-200 hover:shadow-md">
+                <Paperclip size={20} />
+              </button>
+
+              {/* Text Input */}
               <textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Message Butter AI..."
-                className="w-full px-5 py-4 border border-gray-300 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none scrollbar-hide shadow-sm"
-                rows="1"
-                style={{ minHeight: '56px', maxHeight: '200px' }}
+                placeholder="Type your message..."
+                rows={1}
+                className="flex-1 bg-transparent text-white text-sm placeholder-gray-500 resize-none focus:outline-none max-h-32 py-2"
+                style={{ minHeight: '24px' }}
               />
+
+              {/* Voice/Send Button */}
+              {input.trim() ? (
+                <button
+                  onClick={handleSend}
+                  className="flex-shrink-0 p-2.5 bg-gradient-to-br from-purple-600 via-purple-500 to-violet-600 hover:from-purple-700 hover:via-purple-600 hover:to-violet-700 text-white rounded-xl transition-all duration-200 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent"></div>
+                  <Send size={20} className="relative z-10 drop-shadow-md" />
+                </button>
+              ) : (
+                <button
+                  onClick={toggleRecording}
+                  className={`flex-shrink-0 p-2.5 rounded-xl transition-all duration-200 relative overflow-hidden ${
+                    isRecording
+                      ? 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white animate-pulse shadow-lg shadow-red-500/50'
+                      : 'text-gray-400 hover:text-white hover:bg-zinc-800 hover:shadow-md'
+                  }`}
+                >
+                  {isRecording && <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent"></div>}
+                  {isRecording ? <Square size={20} className="relative z-10" /> : <Mic size={20} />}
+                </button>
+              )}
             </div>
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || isTyping}
-              className={`rounded-full transition-all duration-200 flex items-center justify-center flex-shrink-0 ${
-                input.trim() && !isTyping
-                  ? 'bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-              style={{ height: '56px', width: '56px' }}
-            >
-              <Send size={20} />
-            </button>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-400">
-            <Sparkles size={12} />
-            <span>...Butter AI can make mistakes...</span>
-          </div>
+
+          {/* Footer Info */}
+          <p className="text-xs text-gray-600 text-center mt-3">
+            ButterChat AI can make mistakes. Consider checking important information.
+          </p>
         </div>
       </div>
 
-      <style>{`
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
         }
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
         }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #3f3f46;
+          border-radius: 3px;
         }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        textarea {
-          field-sizing: content;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #52525b;
         }
       `}</style>
     </div>

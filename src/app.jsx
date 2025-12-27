@@ -7,6 +7,8 @@ import LoginPage from './pages/auth/login-page';
 import SignupPage from './pages/auth/signup-page';
 import { useAuth } from './provider/auth-provider';
 import CompanyProfileSetup from './pages/auth/onboarding/company-info-setup';
+import ButterChatUI from './pages/butter-chat-ui';
+import DepartmentPage from './pages/department/department-page';
 
 
 // Navigation Item Component
@@ -184,7 +186,7 @@ const Layout = () => {
   const [isDark, setIsDark] = useState(true);
   
   // Mock location - replace with useLocation() from react-router-dom
-  const location = { pathname: '/' };
+  const location = useLocation();
 
   return (
     <div className="flex justify-center min-h-screen bg-black">
@@ -219,18 +221,14 @@ const Layout = () => {
 
           {/* Main content area - Your Routes go here */}
           <main className="flex-1 overflow-y-auto bg-black custom-scrollbar">
-            {/* This is where your <Routes> component would render */}
-            <div className="h-full flex items-center justify-center p-6">
-              <div className="text-center">
-                <MessageSquare className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-semibold text-white mb-2">
-                  Connect Your Routes Here
-                </h2>
-                <p className="text-gray-400">
-                  Replace this with your {'<Routes>'} component
-                </p>
-              </div>
-            </div>
+                    
+          <Routes>
+            <Route path="/" element={<ButterChatUI />} />
+            <Route path="/dashboard" element={<ButterChatUI />} />
+            <Route path="/department" element={<DepartmentPage/>} />
+            <Route path="/agents" element={<ButterChatUI />} />
+            <Route path="/commerce/:type" element={<ButterChatUI />} />
+          </Routes>
           </main>
         </div>
       </div>
