@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* 
+@layer base {
+  * {
+    @apply border-slate-700;
+  }
+  body {
+    @apply bg-slate-900 text-white font-sans antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent;
+  }
+  
+  .gradient-border {
+    @apply border border-transparent bg-gradient-to-r from-purple-500 to-cyan-500 bg-origin-border;
+  }
+  
+  .code-block {
+    @apply bg-slate-900/80 rounded-xl p-4 font-mono text-sm border border-slate-700/50;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-xl font-medium hover:opacity-90 transition-all;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-all;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+} */
+
+/* Code syntax highlighting colors */
+.token-keyword { color: #c678dd; }
+.token-string { color: #98c379; }
+.token-function { color: #61afef; }
+.token-comment { color: #5c6370; }
+.token-number { color: #d19a66; }
